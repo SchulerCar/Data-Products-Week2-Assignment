@@ -1,0 +1,16 @@
+﻿itemNo,material,company,location,destination,type
+1,Drug,MediChem,"Sant Joan Despí, Spain",4,Pharmaceutical Ingredient
+2,EVA resin,Celanese,"Irving, TX 75099",3,Raw material
+3,Shells,West Pharma,"2921 Reach Rd, Williamsport, PA 17701",6,Component
+4,Size-classified drug,PowderSize,"Quakertown, PA 18951",6,Pharmaceutical Ingredient
+5,Film,Steiner GmbH,"Jägersgrund 1 + 3, D – 57339 Erndtebrück, Germany",6,Raw material
+6,Assembled drug package,Microtest Labs,"630 Silver St, Agawam, MA 01001",12,Assembly
+7,Spring,Newcomb,"5408 Panola Industrial Blvd, Stonecrest, GA 30035",12,Component
+8,Foam,Pacific Die-Cut,"3399 Arden Road, Hayward CA 94545",12,Component
+9,Packaging Film,DDL,"9400 Toledo Way, Irvine, CA 92618",12,Raw material
+10,Plastic resins,Sabic,"2500 CityWest Blvd, Houston, TX 77042",11,Raw material
+11,Plastic parts - Molding,Phillips-Medisize,"422 Technology Dr E, Menomonie, WI 54751",12,Component
+12,Device Assembly,The Tech Group,"40 S Rockford Dr, Tempe, AZ 85281",13,Assembly
+13,Terminal Sterilization,Steris,"9400 Toledo Way, Irvine, CA 92618","14,15",Assembly
+14,Release Testing,iPharma,"32930 Alvarado-Niles Rd, Union City, CA 94587",0,Assembly
+15,Distribution Center,AmeriSource-Bergen,"1325 Striker Ave, Sacramento, CA 95834",0,Final Product

@@ -1,0 +1,177 @@
+---
+title: "Peer-graded Assignment: R Markdown and Leaflet"
+author: "Carlos Schuler"
+date: "8/14/2020"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Assignment
+
+Create a web page using R Markdown that features a map created with Leaflet.
+
+Host your webpage on either GitHub Pages, RPubs, or NeoCities.
+
+Your webpage must contain the date that you created the document, and it must contain a map created with Leaflet. We would love to see you show off your creativity!
+
+## Supply Chain Map
+
+The map below shows the supply chain for a ficticious durg-device combination product:
+
+* The circle colors indicate the type of material (pharmaceutical ingredient, raw material, component, etc.)  
+* The lines connect the material source with its destination  
+* Clicking on the circle markers brings up details about the material and manufacturing location
+
+<div style="margin-bottom:50px;">
+</div>
+
+```{r leafletPlot, echo=FALSE,fig.width=9,fig.height=9, message = FALSE, warning=FALSE}
+###############
+## geocoding function using OSM Nominatim API
+## details: http://wiki.openstreetmap.org/wiki/Nominatim, made by: D.Kisler 
+## Code borrowed from: https://datascienceplus.com/osm-nominatim-with-r-getting-locations-geo-coordinates-by-its-address/
+nominatim_osm <- function(address = NULL)
+{
+        if(suppressWarnings(is.null(address)))
+                return(data.frame())
+        tryCatch(
+                d <- jsonlite::fromJSON( 
+                        gsub('\\@addr\\@', gsub('\\s+', '\\%20', address), 
+                             'http://nominatim.openstreetmap.org/search/@addr@?format=json&addressdetails=0&limit=1')
+                ), error = function(c) return(data.frame())
+        )
+        if(length(d) == 0) return(data.frame())
+        return(data.frame(lon = as.numeric(d$lon), lat = as.numeric(d$lat)))
+}
+###############
+
+library(leaflet)
+library(tidyverse)
+library(geosphere)
+library(viridisLite)
+
+#Read the supply chain location data
+supplyChain <- read.csv("SupplyChain.csv")
+supplyChain$type<-factor(supplyChain$type)
+
+#Get the coordinates
+coord <- sapply(supplyChain$location,nominatim_osm)
+coord <- data.frame(matrix(unlist(coord),nrow=length(coord)/2,ncol=2,byrow=TRUE))
+names(coord) <- c("lng","lat")
+supplyChain <- cbind(supplyChain,coord) %>% 
+        mutate(popup=paste("Item Number:", supplyChain$itemNo, "- Company:", supplyChain$company,
+                           "<br>Material: ", supplyChain$material,
+                           "<br>Location: ", supplyChain$location, 
+                           "<br>Destination: ", supplyChain$destination,
+                           "<br>Type: ",supplyChain$type))
+
+# Set palette
+domain <- range(as.numeric(supplyChain$type))
+pal <- colorNumeric(palette = viridis(100), domain = domain)
+
+# Draw map
+myMap <- leaflet(supplyChain) %>%
+        addTiles() %>%
+        addCircleMarkers(color=~pal(as.numeric(type)),popup=~popup)
+
+# Add lines
+for(i in 1:(dim(supplyChain)[1])) {
+        if(supplyChain$destination[i]!="0") {
+                destVector<-unlist(strsplit(supplyChain$destination[i],split=","))
+                for(j in 1:length(destVector)) {
+                        d <- as.numeric(destVector[j])
+                        start <- c(supplyChain$lng[i], supplyChain$lat[i])
+                        end <-   c(supplyChain$lng[d], supplyChain$lat[d])
+                        line <- gcIntermediate(start,end, n=50, addStartEnd=TRUE)
+                        myMap <- myMap %>%  addPolylines(lng=line[,1],lat=line[,2]) 
+                }
+        }
+}
+myMap
+```
+
+## Code
+
+The map above was generated using the following code:
+
+```{r leafletPlotCode, eval=FALSE}
+###############
+## geocoding function using OSM Nominatim API
+## details: http://wiki.openstreetmap.org/wiki/Nominatim, made by: D.Kisler 
+## Code borrowed from: https://datascienceplus.com/osm-nominatim-with-r-getting-locations-geo-coordinates-by-its-address/
+nominatim_osm <- function(address = NULL)
+{
+        if(suppressWarnings(is.null(address)))
+                return(data.frame())
+        tryCatch(
+                d <- jsonlite::fromJSON( 
+                        gsub('\\@addr\\@', gsub('\\s+', '\\%20', address), 
+                             'http://nominatim.openstreetmap.org/search/@addr@?format=json&addressdetails=0&limit=1')
+                ), error = function(c) return(data.frame())
+        )
+        if(length(d) == 0) return(data.frame())
+        return(data.frame(lon = as.numeric(d$lon), lat = as.numeric(d$lat)))
+}
+###############
+
+library(leaflet)
+library(tidyverse)
+library(geosphere)
+library(viridisLite)
+
+#Read the supply chain location data
+supplyChain <- read.csv("SupplyChain.csv")
+supplyChain$type<-factor(supplyChain$type)
+
+#Get the coordinates
+coord <- sapply(supplyChain$location,nominatim_osm)
+coord <- data.frame(matrix(unlist(coord),nrow=length(coord)/2,ncol=2,byrow=TRUE))
+names(coord) <- c("lng","lat")
+supplyChain <- cbind(supplyChain,coord) %>% 
+        mutate(popup=paste("Item Number:", supplyChain$itemNo, "- Company:", supplyChain$company,
+                           "<br>Material: ", supplyChain$material,
+                           "<br>Location: ", supplyChain$location, 
+                           "<br>Destination: ", supplyChain$destination,
+                           "<br>Type: ",supplyChain$type))
+
+# Set palette
+domain <- range(as.numeric(supplyChain$type))
+pal <- colorNumeric(palette = viridis(100), domain = domain)
+
+# Draw map
+myMap <- leaflet(supplyChain) %>%
+        addTiles() %>%
+        addCircleMarkers(color=~pal(as.numeric(type)),popup=~popup)
+
+# Add lines
+for(i in 1:(dim(supplyChain)[1])) {
+        if(supplyChain$destination[i]!="0") {
+                destVector<-unlist(strsplit(supplyChain$destination[i],split=","))
+                for(j in 1:length(destVector)) {
+                        d <- as.numeric(destVector[j])
+                        start <- c(supplyChain$lng[i], supplyChain$lat[i])
+                        end <-   c(supplyChain$lng[d], supplyChain$lat[d])
+                        line <- gcIntermediate(start,end, n=50, addStartEnd=TRUE)
+                        myMap <- myMap %>%  addPolylines(lng=line[,1],lat=line[,2]) 
+                }
+        }
+}
+myMap
+```
+
+## Data
+
+The file *SupplyChain.csv* used to generate the map contains the following data:
+
+```{r datafile}
+read.csv("SupplyChain.csv") %>% 
+        knitr::kable("html", align=rep("c",times=20)) %>% 
+        kableExtra::kable_styling(bootstrap_options = c("hover"), 
+                                  full_width = F, position="center")
+```
+
