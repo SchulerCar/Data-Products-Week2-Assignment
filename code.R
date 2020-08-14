@@ -68,7 +68,3 @@ for(i in 1:(dim(supplyChain)[1])) {
 }
 
 myMap
-
-
-
-
